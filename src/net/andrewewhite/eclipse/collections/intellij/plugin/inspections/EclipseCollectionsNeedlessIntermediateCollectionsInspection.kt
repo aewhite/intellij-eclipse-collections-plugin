@@ -41,30 +41,55 @@ class EclipseCollectionsNeedlessIntermediateCollectionsInspection : BaseJavaBatc
         override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
             super.visitMethodCallExpression(expression)
 
-            val methodReferenceName = expression.methodExpression.referenceName ?: return
-            if (methodReferenceName !in lazyMethodsNames) { return }
-
-            val type = expression.type ?: return
-            if (!richIterableType.isAssignableFrom(type)) { return }
-            if (lazyIterableType.isAssignableFrom(type))  { return }
-
-            val method = expression.resolveMethod() ?: return
-            val containingClass = method.containingClass ?: return
-
-            if (!supportsAsLazy(containingClass)) { return }
+            if (!isMethodCallInteresting(expression)) { return }
 
             val callChain = buildLazyCallChain(expression)
-            if (callChain.size < 2) { return }
+            if (!isCallChainInteresting(callChain)) { return }
 
-            if (!callChain.allSatisfy { it.methodExpression.referenceName in allLazyMethodsNames }) { return }
-
-            val fixes = arrayOf(EclipseCollectionAsLazyQuickFix())
             holder.registerProblem(
                     expression,
                     "Should use asLazy to avoid intermediate collections",
                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
                     TextRange.create(0, callChain.last().textRange.endOffset - callChain.first().textRange.startOffset),
-                    *fixes)
+                    EclipseCollectionAsLazyQuickFix())
+        }
+
+        private fun isCallChainInteresting(callChain: MutableList<PsiMethodCallExpression>) = callChain.size >= 2 && callChain.allSatisfy { it.methodExpression.referenceName in allLazyMethodsNames }
+
+        private fun isMethodCallInteresting(expression: PsiMethodCallExpression): Boolean {
+            when {
+                !isMethodNameCandidateForAsLazy(expression) -> return false
+                !isTypeCandidateForAsLazy(expression) -> return false
+            }
+
+            return doesLazyIterableSupportMethod(expression)
+        }
+
+        private fun doesLazyIterableSupportMethod(expression: PsiMethodCallExpression): Boolean {
+            val method = expression.resolveMethod() ?: return true
+            val containingClass = method.containingClass ?: return true
+
+            if (!supportsAsLazy(containingClass)) {
+                return false
+            }
+
+            return true
+        }
+
+        private fun isTypeCandidateForAsLazy(expression: PsiMethodCallExpression): Boolean {
+            val type = expression.type ?: return false
+
+            when {
+                !richIterableType.isAssignableFrom(type) -> return false
+                lazyIterableType.isAssignableFrom(type) -> return false
+                else -> return true
+            }
+        }
+
+        private fun isMethodNameCandidateForAsLazy(expression: PsiMethodCallExpression): Boolean {
+            val methodReferenceName = expression.methodExpression.referenceName ?: return true
+
+            return methodReferenceName in lazyMethodsNames
         }
 
         private fun supportsAsLazy(containingClass: PsiClass) = containingClass.findMethodsByName("asLazy", true).isNotEmpty()
@@ -108,5 +133,4 @@ class EclipseCollectionAsLazyQuickFix : LocalQuickFix {
         sourceExpression.replace(elementFactory.createExpressionFromText(sourceExpression.text + ".asLazy()", sourceExpression))
         CodeStyleManager.getInstance(project).reformat(JavaCodeStyleManager.getInstance(project).shortenClassReferences(element))
     }
-
 }
