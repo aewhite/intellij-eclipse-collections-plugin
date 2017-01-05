@@ -7,6 +7,7 @@ import com.intellij.psi.*
 import com.intellij.psi.JavaTokenType.DOT
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.codeStyle.JavaCodeStyleManager
+import com.intellij.psi.search.GlobalSearchScope
 import org.eclipse.collections.api.RichIterable
 import org.eclipse.collections.api.list.MutableList
 import org.eclipse.collections.api.set.ImmutableSet
@@ -21,13 +22,23 @@ import javax.swing.JComponent
 class EclipseCollectionsNeedlessIntermediateCollectionsInspection : BaseJavaBatchLocalInspectionTool() {
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
+        if (!isEclipseCollectionsBeingUsed(holder)) { return PsiElementVisitor.EMPTY_VISITOR }
         return EclipseCollectionsNeedlessIntermediateCollectionsInspection.Visitor(holder, isOnTheFly)
+    }
+
+    private fun isEclipseCollectionsBeingUsed(holder: ProblemsHolder): Boolean {
+        val manager = holder.manager
+        val scope = GlobalSearchScope.allScope(holder.project)
+        val javaPsiFacade = JavaPsiFacade.getInstance(manager.project)
+        val richIterableClass = javaPsiFacade.findClass(CommonEclipseCollectionClassNames.EC_RICH_ITERABLE, scope)
+
+        return richIterableClass != null
     }
 
     internal class Visitor(val holder: ProblemsHolder, val isOnTheFly: Boolean) : JavaElementVisitor() {
         val elementFactory: PsiElementFactory = JavaPsiFacade.getElementFactory(holder.project)
-        val richIterableType: PsiClassType = elementFactory.createTypeByFQClassName("org.eclipse.collections.api.RichIterable")
-        val lazyIterableType: PsiClassType = elementFactory.createTypeByFQClassName("org.eclipse.collections.api.LazyIterable")
+        val richIterableType: PsiClassType = elementFactory.createTypeByFQClassName(CommonEclipseCollectionClassNames.EC_RICH_ITERABLE)
+        val lazyIterableType: PsiClassType = elementFactory.createTypeByFQClassName(CommonEclipseCollectionClassNames.EC_LAZY_ITERABLE)
         val lazyClass: PsiClass = lazyIterableType.resolve()!!
         val lazyMethodsNames: ImmutableSet<String> = findInterestingLazyMethod()
         val allLazyMethodsNames: ImmutableSet<String> = Sets.immutable.of(*lazyClass.allMethods).collect { it.name }

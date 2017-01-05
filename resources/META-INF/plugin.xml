@@ -25,15 +25,6 @@
     -->
 
     <extensions defaultExtensionNs="com.intellij">
-        <!--<localInspection groupPath="Java"-->
-                         <!--language="JAVA"-->
-                         <!--shortName="MigrateToEclipseCollections"-->
-                         <!--displayName="Code can be converted to Eclipse-Collections API"-->
-                         <!--groupName="Eclipse Collections"-->
-                         <!--enabledByDefault="true"-->
-                         <!--level="INFORMATION"-->
-                         <!--implementationClass="net.andrewewhite.eclipse.collections.intellij.plugin.inspections.EclipseCollectionsApiMigrationInspection"/>-->
-
         <localInspection groupPath="Java"
                          language="JAVA"
                          shortName="NeedlessIntermediateCollection"
