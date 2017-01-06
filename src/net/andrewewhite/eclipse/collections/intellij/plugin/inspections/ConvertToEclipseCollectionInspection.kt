@@ -42,8 +42,6 @@ class ConvertToEclipseCollectionInspection : BaseJavaBatchLocalInspectionTool() 
                     "Could use '${suggestedReplacement}' from Eclipse Collections",
                     ProblemHighlightType.INFORMATION,
                     null as TextRange?)
-
-            val breakHere = 0
         }
 
         fun suggestAlternative(type: PsiClassType, typeParameters: Array<out PsiType>): String? {
