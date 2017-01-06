@@ -40,7 +40,7 @@ class ConvertToEclipseCollectionInspection : BaseJavaBatchLocalInspectionTool() 
             holder.registerProblem(
                     expression,
                     "Could use '${suggestedReplacement}' from Eclipse Collections",
-                    ProblemHighlightType.INFORMATION,
+                    ProblemHighlightType.WEAK_WARNING,
                     null as TextRange?)
         }
 
