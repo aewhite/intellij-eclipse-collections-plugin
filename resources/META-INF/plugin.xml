@@ -43,6 +43,15 @@
                          level="WARNING"
                          implementationClass="net.andrewewhite.eclipse.collections.intellij.plugin.inspections.EclipseCollectionsSuspiciousMethodCallsInspection"/>
 
+        <localInspection groupPath="Java"
+                         language="JAVA"
+                         shortName="JavaCollectionConvertibleToEclipseCollection"
+                         displayName="Java Collection convertible to Eclipse Collections"
+                         groupName="Eclipse Collections"
+                         enabledByDefault="true"
+                         level="INFORMATION"
+                         implementationClass="net.andrewewhite.eclipse.collections.intellij.plugin.inspections.ConvertToEclipseCollectionInspection"/>
+
     </extensions>
 
     <actions>

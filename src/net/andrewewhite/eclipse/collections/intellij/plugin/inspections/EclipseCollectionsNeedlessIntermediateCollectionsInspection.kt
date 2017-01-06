@@ -26,15 +26,6 @@ class EclipseCollectionsNeedlessIntermediateCollectionsInspection : BaseJavaBatc
         return EclipseCollectionsNeedlessIntermediateCollectionsInspection.Visitor(holder, isOnTheFly)
     }
 
-    private fun isEclipseCollectionsBeingUsed(holder: ProblemsHolder): Boolean {
-        val manager = holder.manager
-        val scope = GlobalSearchScope.allScope(holder.project)
-        val javaPsiFacade = JavaPsiFacade.getInstance(manager.project)
-        val richIterableClass = javaPsiFacade.findClass(CommonEclipseCollectionClassNames.EC_RICH_ITERABLE, scope)
-
-        return richIterableClass != null
-    }
-
     internal class Visitor(val holder: ProblemsHolder, val isOnTheFly: Boolean) : JavaElementVisitor() {
         val elementFactory: PsiElementFactory = JavaPsiFacade.getElementFactory(holder.project)
         val richIterableType: PsiClassType = elementFactory.createTypeByFQClassName(CommonEclipseCollectionClassNames.EC_RICH_ITERABLE)
