@@ -33,6 +33,7 @@ class EclipseCollectionsNeedlessIntermediateCollectionsInspection : BaseJavaBatc
         val lazyClass: PsiClass = lazyIterableType.resolve()!!
         val lazyMethodsNames: ImmutableSet<String> = findInterestingLazyMethod()
         val allLazyMethodsNames: ImmutableSet<String> = Sets.immutable.of(*lazyClass.allMethods).collect { it.name }
+        val seenMethods = Sets.mutable.empty<PsiMethodCallExpression>()
 
         // TODO handle primitive lazy iterables
         private fun findInterestingLazyMethod() = Sets.immutable.of(*lazyClass.methods)
@@ -46,8 +47,11 @@ class EclipseCollectionsNeedlessIntermediateCollectionsInspection : BaseJavaBatc
             if (!isMethodCallInteresting(expression)) { return }
 
             val callChain = buildLazyCallChain(expression)
-            if (!isCallChainInteresting(callChain)) { return }
 
+            if (!isCallChainInteresting(callChain)) { return }
+            if (expression in seenMethods) { return }
+            
+            seenMethods.addAll(callChain)
             holder.registerProblem(
                     expression,
                     "Should use asLazy to avoid intermediate collections",
