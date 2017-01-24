@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>net.andrewewhite.eclipse.collections.intellij.plugin</id>
     <name>Eclipse Collections</name>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <!--<vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>-->
 
     <description><![CDATA[
@@ -10,7 +10,8 @@
     ]]></description>
 
     <change-notes><![CDATA[
-      Initial release
+      1.0.1 - Fixed overlapping "asLazy" quick fixes
+      1.0.0 - Initial release
     ]]>
     </change-notes>
 
